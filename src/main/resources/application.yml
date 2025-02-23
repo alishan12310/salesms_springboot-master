@@ -1,0 +1,19 @@
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://43.156.83.246:3036/sales?useUnicode=true&characterEncoding=utf8&autoReconnect=true&useSSL=false&serverTimezone=UTC&createDatabaseIfNotExist=true
+    username: root
+    password: dudu0.0@
+  main:
+    banner-mode: console
+
+mybatis-plus:
+  configuration:
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl # 日志标准输出
+  mapper-locations: com/dyuloon/mapper/xml/*.xml
+  global-config:
+    banner: off
+    db-config:
+      id-type: auto # 数据库自增策略
+server:
+  port: 8082
