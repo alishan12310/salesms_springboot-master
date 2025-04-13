@@ -1,9 +1,9 @@
 spring:
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://43.156.83.246:3306/sales?useUnicode=true&characterEncoding=utf8&autoReconnect=true&useSSL=false&serverTimezone=UTC&createDatabaseIfNotExist=true
+    url: jdbc:mysql://alishan.rwlb.rds.aliyuncs.com:3306/sales?useUnicode=true&characterEncoding=utf8&autoReconnect=true&useSSL=false&serverTimezone=UTC&createDatabaseIfNotExist=true
     username: root
-    password: dudu0.0@
+    password: Jh8#eYjPQACp7MG
   main:
     banner-mode: console
 
