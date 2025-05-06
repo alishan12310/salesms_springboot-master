@@ -50,9 +50,25 @@
           {{ scope.row.goodsUnit.length == 0 ? "暂无数据" : scope.row.goodsUnit }}
         </template>
       </el-table-column>
-      <el-table-column prop="goodsStorehouse" label="存储库房" align="center">
+      <el-table-column prop="storemanageId" label="店铺" align="center">
         <template slot-scope="scope">
-          {{ scope.row.goodsStorehouse.length == 0 ? "暂无数据" : scope.row.goodsStorehouse }}
+<!--          <el-input size="small" v-model="scope.row.storemanageId" placeholder="店铺id" clearable></el-input>-->
+          <el-select
+              v-model="scope.row.storemanageId"
+              placeholder="请选择店铺"
+              size="small"
+              style="width: 100%"
+              filterable
+              clearable
+          >
+            <el-option
+                v-for="item in storeOptions"
+                :key="item.value"
+                :label="item.label"
+                :value="item.value"
+            />
+          </el-select>
+
         </template>
       </el-table-column>
       <el-table-column prop="recordName" label="售出数量" align="center">
@@ -88,11 +104,13 @@ import {
   queryGoodsDetails,
   queryAllGoods,
 } from "@/apis/sales/salesRecordManagement.js";
+import {queryStoreName} from "@/apis/store/storeManagement";
 
 export default {
   name: "addStore",
   data() {
     return {
+      storeOptions: [], // 用于下拉显示店铺
       goodsId: [],
       // 控制弹窗
       open: false,
@@ -121,6 +139,7 @@ export default {
         goodsQuantity: "",
         goodsPrice: "",
         goodsCategory: "",
+        storemanageId:""
       },
       // 货物列表
       tableData: [
@@ -142,6 +161,17 @@ export default {
       .catch(() => { });
     // this.queryCategory();
     // this.searchUnit();
+
+    queryAllGoods().then(({ data }) => {
+      this.goods.options = data;
+    });
+
+    queryStoreName().then(({ data }) => {
+      this.storeOptions = data.map(store => ({
+        label: store.storemanageName,
+        value: store.storemanageId
+      }));
+    });
   },
   mounted() {
     // 货物列表

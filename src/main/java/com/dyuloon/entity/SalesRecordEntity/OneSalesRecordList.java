@@ -18,6 +18,8 @@ public class OneSalesRecordList {
      * 订单编号
      */
     private String recordOrder;
+
+    private Long storemanageId;
     /**
      * 订单日期
      */

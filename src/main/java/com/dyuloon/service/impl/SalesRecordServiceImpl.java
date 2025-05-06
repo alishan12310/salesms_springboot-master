@@ -155,7 +155,7 @@ public class SalesRecordServiceImpl extends ServiceImpl<SalesRecordMapper, Sales
         QueryWrapper<SalesRecord> qwOne = new QueryWrapper<>();
         // 查所有订单编号去重
         // 查所有操作人员去重
-        qwOne.select("Distinct record_order,record_salesperson,record_date");
+        qwOne.select("Distinct record_order,record_salesperson,record_date,storemanage_id");
         // 分页查询条件
         if (searchForm.getKey().equals("record_salesperson")) {
             qwOne.eq(searchForm.getKey(), searchForm.getValue());
@@ -184,6 +184,7 @@ public class SalesRecordServiceImpl extends ServiceImpl<SalesRecordMapper, Sales
             oneSalesRecordList.setRecordSalesperson(user.getUserName());
             oneSalesRecordList.setRecordOrder(oneList.getRecords().get(i).getRecordOrder());
             oneSalesRecordList.setRecordDate(oneList.getRecords().get(i).getRecordDate());
+            oneSalesRecordList.setStoremanageId(oneList.getRecords().get(i).getStoremanageId());
             finalList.add(oneSalesRecordList);
 
             // 封装二级菜单

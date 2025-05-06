@@ -45,6 +45,12 @@
       <el-table-column prop="id" type="index" label="序号" width="60px" align="center"></el-table-column>
       <el-table-column prop="recordOrder" label="订单号" align="center"></el-table-column>
       <el-table-column prop="recordSalesperson" label="销售人员" align="center"></el-table-column>
+      <el-table-column label="店铺" align="center">
+        <template slot-scope="scope">
+          {{ getStoreNameById(scope.row.storemanageId) }}
+        </template>
+      </el-table-column>
+
       <el-table-column prop="recordDate" label="订单日期" align="center"></el-table-column>
       <el-table-column label="操作" align="center" width="180">
         <template slot-scope="scope">
@@ -63,10 +69,11 @@
 import {
   getsalesRecords,
   delallsalesRecords,
-  queryAllPeople,
+  queryAllPeople, queryAllGoods,
 } from "@/apis/sales/salesRecordManagement.js";
 import detailsSales from "@/components/sales/detailsSales";
 import addSales from "@/components/sales/addSales";
+import {queryStoreName} from "@/apis/store/storeManagement";
 export default {
   name: "storeManagement",
   components: {
@@ -106,9 +113,23 @@ export default {
     };
   },
   created() {
+    queryAllGoods().then(({ data }) => {
+      this.goods.options = data;
+    });
+
+    queryStoreName().then(({ data }) => {
+      this.storeOptions = data.map(store => ({
+        label: store.storemanageName,
+        value: store.storemanageId
+      }));
+    });
     this.search();
   },
   methods: {
+    getStoreNameById(id) {
+      const store = this.storeOptions.find(item => item.value === id);
+      return store ? store.label : '未知店铺';
+    },
     //控制显示选择框
     change() {
       if (this.ruleForm.key === "record_Order") {
