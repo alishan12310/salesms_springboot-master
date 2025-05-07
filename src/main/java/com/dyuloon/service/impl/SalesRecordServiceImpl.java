@@ -25,8 +25,10 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * <p>
@@ -294,45 +296,7 @@ public class SalesRecordServiceImpl extends ServiceImpl<SalesRecordMapper, Sales
         return resultVO;
     }
 
-    // 上月各店铺销售额
-    @Override
-    public ResultVO getStoreOrders() {
-        // 最终输出
-        List<ShowMonthData> showMonthDataList = new ArrayList<>();
-        // 得到当前年月
-        Calendar date = Calendar.getInstance();
-        String year = String.valueOf(date.get(Calendar.YEAR));
-        Integer month = date.get(Calendar.MONTH);
-        // 拼模糊查询
-        String nowStr = month < 10 ? year + "-0" + month : year + "-" + month;
-        // 查所有店铺
-        List<StoreStoremanage> storeStoremanageList = this.storeStoremanageMapper.selectList(null);
-        for (int i = 0; i < storeStoremanageList.size(); i++) {
-            // 商店名放到对象里
-            ShowMonthData showMonthData = new ShowMonthData();
-            showMonthData.setName(storeStoremanageList.get(i).getStoremanageName());
-            // 查该店铺所有员工
-            LambdaQueryWrapper<User> lqwUser = new LambdaQueryWrapper<>();
-            lqwUser.eq(User::getUserWorkstore, storeStoremanageList.get(i).getStoremanageId());
-            List<User> userList = this.userMapper.selectList(lqwUser);
-            Integer salesRecordSum = 0;
-            for (int j = 0; j < userList.size(); j++) {
-                // 查上个月该用户所有销售数据
-                LambdaQueryWrapper<SalesRecord> lqw = new LambdaQueryWrapper<>();
-                lqw.eq(SalesRecord::getRecordSalesperson, userList.get(j).getUserId());
-                lqw.like(SalesRecord::getRecordDate, nowStr);
-                List<SalesRecord> salesRecordList = this.baseMapper.selectList(lqw);
-                for (int k = 0; k < salesRecordList.size(); k++) {
-                    salesRecordSum = salesRecordSum + salesRecordList.get(k).getRecordPrice().intValue();
-                }
-            }
-            showMonthData.setValue(salesRecordSum);
-            // 对象推到最终数组里
-            showMonthDataList.add(showMonthData);
-        }
-        ResultVO resultVO = ResultVOUtil.success(showMonthDataList, "查询成功");
-        return resultVO;
-    }
+
 
     // 热销货物
     @Override
@@ -465,42 +429,85 @@ public class SalesRecordServiceImpl extends ServiceImpl<SalesRecordMapper, Sales
     // 上月各店铺销售单数
     @Override
     public ResultVO getSalesOrders() {
-        // 最终输出
-        List<ShowMonthData> showMonthDataList = new ArrayList<>();
-        // 得到当前年月
-        Calendar date = Calendar.getInstance();
-        String year = String.valueOf(date.get(Calendar.YEAR));
-        Integer month = date.get(Calendar.MONTH);
-        // 拼模糊查询
-        String nowStr = month < 10 ? year + "-0" + month : year + "-" + month;
-        // 查所有店铺
-        List<StoreStoremanage> storeStoremanageList = this.storeStoremanageMapper.selectList(null);
-        for (int i = 0; i < storeStoremanageList.size(); i++) {
-            // 商店名放到对象里
-            ShowMonthData showMonthData = new ShowMonthData();
-            showMonthData.setName(storeStoremanageList.get(i).getStoremanageName());
-            // 查该店铺所有员工
-            LambdaQueryWrapper<User> lqwUser = new LambdaQueryWrapper<>();
-            lqwUser.eq(User::getUserWorkstore, storeStoremanageList.get(i).getStoremanageId());
-            List<User> userList = this.userMapper.selectList(lqwUser);
-            Integer salesRecordSum = 0;
-            for (int j = 0; j < userList.size(); j++) {
-                // 查上个月该用户所有销售单数
-                // 销售编号去重
-                QueryWrapper<SalesRecord> qw = new QueryWrapper<>();
-                qw.select("Distinct record_order");
-                qw.lambda().like(SalesRecord::getRecordDate, nowStr);
-                qw.lambda().eq(SalesRecord::getRecordSalesperson, userList.get(j).getUserId());
-                // 查销售单数
-                salesRecordSum = salesRecordSum + this.baseMapper.selectCount(qw);
-            }
-            showMonthData.setValue(salesRecordSum);
-            // 对象推到最终数组里
-            showMonthDataList.add(showMonthData);
+        // 获取上个月的 yyyy-MM 字符串
+        Calendar calendar = Calendar.getInstance();
+        calendar.add(Calendar.MONTH, -1); // 回退到上个月
+        String yearMonth = new SimpleDateFormat("yyyy-MM").format(calendar.getTime());
+
+        // 查询所有销售记录，过滤条件：record_date like 'yyyy-MM%'
+        LambdaQueryWrapper<SalesRecord> salesWrapper = new LambdaQueryWrapper<>();
+        salesWrapper.like(SalesRecord::getRecordDate, yearMonth);
+        List<SalesRecord> salesRecords = this.baseMapper.selectList(salesWrapper);
+
+        // 获取所有店铺信息（用于匹配店铺名称）
+        List<StoreStoremanage> storeList = this.storeStoremanageMapper.selectList(null);
+        Map<Long, String> storeIdToNameMap = storeList.stream()
+                .collect(Collectors.toMap(StoreStoremanage::getStoremanageId, StoreStoremanage::getStoremanageName));
+
+        // 统计每个店铺的销量
+        Map<Long, Integer> storeIdToSalesNumMap = new HashMap<>();
+        for (SalesRecord record : salesRecords) {
+            Long storeId = record.getStoremanageId();
+            Integer num = record.getRecordNum() != null ? record.getRecordNum().intValue() : 0;
+            storeIdToSalesNumMap.merge(storeId, num, Integer::sum); // 累加销量
         }
-        ResultVO resultVO = ResultVOUtil.success(showMonthDataList, "查询成功");
-        return resultVO;
+
+        // 组装返回结构
+        List<ShowMonthData> resultList = new ArrayList<>();
+        for (Map.Entry<Long, Integer> entry : storeIdToSalesNumMap.entrySet()) {
+            Long storeId = entry.getKey();
+            Integer totalNum = entry.getValue();
+
+            ShowMonthData data = new ShowMonthData();
+            data.setName(storeIdToNameMap.getOrDefault(storeId, "未知店铺"));
+            data.setValue(totalNum);
+            resultList.add(data);
+        }
+
+        return ResultVOUtil.success(resultList, "查询成功");
     }
+
+    // 上月各店铺销售额
+    @Override
+    public ResultVO getStoreOrders() {
+        // 获取上个月的 yyyy-MM 格式字符串
+        Calendar calendar = Calendar.getInstance();
+        calendar.add(Calendar.MONTH, -1);
+        String lastMonthStr = new SimpleDateFormat("yyyy-MM").format(calendar.getTime());
+
+        // 查询上个月所有销售记录
+        LambdaQueryWrapper<SalesRecord> salesQuery = new LambdaQueryWrapper<>();
+        salesQuery.like(SalesRecord::getRecordDate, lastMonthStr);
+        List<SalesRecord> salesRecords = this.baseMapper.selectList(salesQuery);
+
+        // 获取所有店铺，用于匹配店铺名称
+        List<StoreStoremanage> storeList = this.storeStoremanageMapper.selectList(null);
+        Map<Long, String> storeIdToNameMap = storeList.stream()
+                .collect(Collectors.toMap(StoreStoremanage::getStoremanageId, StoreStoremanage::getStoremanageName));
+
+        // 汇总每个店铺的收入
+        Map<Long, BigDecimal> storeIncomeMap = new HashMap<>();
+        for (SalesRecord record : salesRecords) {
+            Long storeId = record.getStoremanageId();
+            BigDecimal price = record.getRecordPrice() != null ? record.getRecordPrice() : BigDecimal.ZERO;
+            storeIncomeMap.merge(storeId, price, BigDecimal::add);
+        }
+
+        // 组装返回结果
+        List<ShowMonthData> showMonthDataList = new ArrayList<>();
+        for (Map.Entry<Long, BigDecimal> entry : storeIncomeMap.entrySet()) {
+            Long storeId = entry.getKey();
+            BigDecimal totalIncome = entry.getValue();
+
+            ShowMonthData data = new ShowMonthData();
+            data.setName(storeIdToNameMap.getOrDefault(storeId, "未知店铺"));
+            data.setValue(totalIncome.intValue()); // 如果你希望显示小数，可改成 double 或 BigDecimal
+            showMonthDataList.add(data);
+        }
+
+        return ResultVOUtil.success(showMonthDataList, "查询成功");
+    }
+
 
     // 获取员工
     @Override
