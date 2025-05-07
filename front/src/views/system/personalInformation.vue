@@ -115,17 +115,15 @@
               <el-input v-model="ruleForm.userNotes"></el-input>
             </el-form-item>
           </el-col>
-          <el-col :xl="8" :lg="8">
-            <el-form-item label="状态:" prop="userState">
-              <el-input v-model="ruleForm.userState" readonly></el-input>
-            </el-form-item>
-          </el-col>
-          <el-col :xl="8" :lg="8">
-            <el-form-item label="用户身份:" prop="userIdentity">
+          <el-descriptions-item>
+            <template slot="label"> 状态 </template>
+            <el-tag size="small">{{ displayUserState }}</el-tag>
+          </el-descriptions-item>
+          <el-descriptions-item>
+            <template slot="label"> 用户身份 </template>
+            <el-tag size="small">{{ displayUserIdentity }}</el-tag>
+          </el-descriptions-item>
 
-              <el-input v-model="ruleForm.userIdentity" readonly></el-input>
-            </el-form-item>
-          </el-col>
           <el-col :xl="8" :lg="8">
             <el-form-item label="用户密码:" prop="userPassword">
               <el-input v-model="ruleForm.userPassword"></el-input>
@@ -212,6 +210,9 @@ import {
 export default {
   data() {
     return {
+      displayUserState: '',
+      displayUserIdentity: '',
+
       flag: true, // 比哦之
       dialogVisible: false,
       size: "",
@@ -281,17 +282,13 @@ export default {
       searchuser(user).then((res) => {
         this.userInformation = res.data;
         console.log(this.userInformation.userState+'---------0')
+
+        this.userInformation = res.data;
         this.ruleForm = res.data;
-        if (this.ruleForm.userState == 1) {
-          this.ruleForm.userState = "离职";
-        } else {
-          this.ruleForm.userState = "在职";
-        }
-        if (this.ruleForm.userIdentity == 0) {
-          this.ruleForm.userIdentity = "管理员";
-        } else {
-          this.ruleForm.userIdentity = "销售员";
-        }
+
+        this.displayUserState = res.data.userState == 0 ? "在职" : "离职";
+        this.displayUserIdentity = res.data.userIdentity == 0 ? "管理员" : "销售员";
+
       });
     },
     //:关闭对话框

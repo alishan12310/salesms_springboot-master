@@ -127,7 +127,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     @Override
     public ResultVO adduser(AddUser addUser) {
         User user = new User();
-        user.setUserState("0");
+        user.setUserState(0);
         user.setUserIdentity(1);
         BeanUtils.copyProperties(addUser,user);
         int save = this.userMapper.insert(user);
@@ -198,7 +198,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     // 人员管理：添加人员
     @Override
     public ResultVO addAllMan(User user) {
-        user.setUserState("0");
+        user.setUserState(0);
         int save = this.userMapper.insert(user);
         ResultVO resultVO = save == 1 ? ResultVOUtil.success(null,"添加成功！") : ResultVOUtil.fail("添加失败！");
         return resultVO;

@@ -57,9 +57,9 @@
       </el-table-column>
       <el-table-column label="状态" align="center" width="100px">
         <template slot-scope="scope">
-          <el-tag size="small" :type="scope.row.userState === '0' ? 'success' : 'warning'">{{
-            scope.row.userState === '0' ? '在职' : '离职'
-          }}</el-tag>
+          <el-tag size="small" :type="scope.row.userState === 0 ? 'success' : 'warning'">
+            {{ scope.row.userState === 0 ? '在职' : '离职' }}
+          </el-tag>
         </template>
       </el-table-column>
       <el-table-column prop="userIdentity" label="用户身份" align="center" width="120px">

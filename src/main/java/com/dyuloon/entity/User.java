@@ -78,7 +78,7 @@ public class User implements Serializable {
     /**
      * 状态（0:在职,1:离职）
      */
-    private String userState;
+    private Integer userState;
 
     /**
      * 用户身份：0（管理员）1（销售员）
