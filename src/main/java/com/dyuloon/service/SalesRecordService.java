@@ -38,8 +38,6 @@ public interface SalesRecordService extends IService<SalesRecord> {
     // 格式化一个月的每一天
     ResultVO getFormatDay(ShowDayDataParameter showDayDataParameter);
 
-    // 上月各店铺销售单数
-    ResultVO getStoreOrders();
 
     // 热销货物
     ResultVO getSellingGoods();
@@ -55,6 +53,9 @@ public interface SalesRecordService extends IService<SalesRecord> {
 
     // 上月各店铺销售单数
     ResultVO getSalesOrders();
+
+    // 上月各店铺销售额
+    ResultVO getStoreOrders();
 
     // 获取员工
     ResultVO getObtainEmployees();
