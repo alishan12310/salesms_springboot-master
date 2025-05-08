@@ -52,6 +52,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     public ResultVO login(RuleFrom ruleFrom) {
         QueryWrapper<User> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("user_tel", ruleFrom.getUsername());
+        queryWrapper.eq("user_state", 0);
         User user = this.userMapper.selectOne(queryWrapper);
         ResultVO resultVO = null;
         if (user == null || !user.getUserPassword().equals(ruleFrom.getPassword()) || !user.getUserIdentity().equals(ruleFrom.getFlag())) {
