@@ -75,7 +75,7 @@ public class UserController {
         return resultVO;
     }
 
-    // 员工离职
+    // 员工状态
     @PutMapping("/depart/{id}")
     public ResultVO depart(@PathVariable Integer id){
         ResultVO resultVO = this.userService.depart(id);

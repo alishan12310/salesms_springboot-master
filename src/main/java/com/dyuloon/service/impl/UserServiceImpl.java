@@ -145,21 +145,26 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         return resultVO;
     }
 
-    // 员工离职
+    // 员工状态
     @Override
     public ResultVO depart(Integer id) {
-        User user = this.baseMapper.selectById(id);
-        UpdateWrapper luw = new UpdateWrapper();
-        luw.eq("user_id", id);
-        if (user.getUserState().equals("0")){
-            luw.set("user_state", "1");
-        }else{
-            luw.set("user_state", "0");
+        User user = this.getById(id);
+        if (user == null) {
+            return ResultVOUtil.fail("员工不存在！");
         }
-        int updateUser = baseMapper.update(null, luw);
-        ResultVO resultVO = updateUser != 0 ? ResultVOUtil.success(null,"状态更改成功！") : ResultVOUtil.fail("状态更改失败");
-        return resultVO;
+
+        Integer currentState = user.getUserState();
+        user.setUserState(currentState == 0 ? 1 : 0);
+
+        boolean updated = this.updateById(user);
+        if (updated) {
+            String msg = user.getUserState() == 0 ? "已设为在职" : "已设为离职";
+            return ResultVOUtil.success(null, msg);
+        } else {
+            return ResultVOUtil.fail("更新失败！");
+        }
     }
+
 
     @Override
     public ResultVO delegateEmployee(DelegateUser delegateUser) {

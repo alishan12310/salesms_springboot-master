@@ -38,30 +38,44 @@ export default {
     },
     changeDepart() {
       const _this = this;
-      _this
-        .$confirm("确认更改员工“" + _this.detailsData.userName + "”的在职状态吗？", "提示", {
-          confirmButtonText: "确定",
-          cancelButtonText: "取消",
-          type: "warning",
-        })
-        .then(() => {
-          depart(this.detailsData.userId).then(res => {
-            // console.log(res);
-            if (res.code === 0) {
-              _this.$message({
-                type: "success",
-                message: "员工“" + _this.detailsData.userName + "”" + res.msg,
-              });
-              _this.$router.go(0)
-            } else {
-              _this.$message({
-                type: "error",
-                message: "员工“" + _this.detailsData.userName + "”" + res.msg,
-              });
-            }
+      const currentState = _this.detailsData.userState;
+      const nextStateText = currentState === 0 ? '离职' : '在职';
+
+      _this.$confirm(
+          `确认将员工“${_this.detailsData.userName}”的状态更改为“${nextStateText}”吗？`,
+          "提示",
+          {
+            confirmButtonText: "确定",
+            cancelButtonText: "取消",
+            type: "warning",
+          }
+      ).then(() => {
+        depart(_this.detailsData.userId).then(res => {
+          if (res.code === 0) {
+            // 更新本地状态，不刷新页面
+            _this.detailsData.userState = currentState === 0 ? 1 : 0;
+
+            _this.$message({
+              type: "success",
+              message: `员工“${_this.detailsData.userName}”${res.msg}`,
+            });
+          } else {
+            _this.$message({
+              type: "error",
+              message: `员工“${_this.detailsData.userName}”${res.msg}`,
+            });
+          }
+        }).catch(() => {
+          _this.$message({
+            type: "error",
+            message: "请求失败，请稍后重试",
           });
-        }).catch(() => { });
+        });
+      }).catch(() => {
+        // 用户取消，无操作
+      });
     }
+
   },
 }
 </script>
