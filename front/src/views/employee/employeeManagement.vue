@@ -45,7 +45,7 @@
       <el-table-column prop="userEmail" label="电子邮箱" align="center"></el-table-column>
       <el-table-column prop="userState" label="状态" width="140" align="center">
         <template slot-scope="scope">
-          <el-tag size="small" :type="scope.row.userState === '0' ? 'success' : 'danger'" disable-transitions>{{
+          <el-tag size="small" :type="scope.row.userState === 0 ? 'success' : 'warning'" disable-transitions>{{
             scope.row.userState == 0 ? "在职" : "离职"
           }}</el-tag>
         </template>

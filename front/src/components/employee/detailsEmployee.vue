@@ -11,7 +11,7 @@
       }}</el-descriptions-item>
       <el-descriptions-item label="职务">{{ detailsData.userAppointment == null ? "未委派" : detailsData.userAppointment
       }}</el-descriptions-item>
-      <el-descriptions-item label="状态"><el-tag size="small" :type="detailsData.userState === '0' ? 'success' : 'danger'"
+      <el-descriptions-item label="状态"><el-tag size="small" :type="detailsData.userState === 0 ? 'success' : 'warning'"
           disable-transitions>{{ detailsData.userState == 0 ? "在职" : "离职" }}</el-tag></el-descriptions-item>
       <el-descriptions-item label="备注" :span="6">{{ detailsData.userNotes }}</el-descriptions-item>
     </el-descriptions>
