@@ -32,7 +32,7 @@
       !detailsData.userAppointment ? "未委派" : detailsData.userAppointment
     }}</el-descriptions-item>
     <el-descriptions-item label="状态">
-      <el-tag :type="detailsData.userState === 0 ? 'success' : 'info'">{{
+      <el-tag :type="detailsData.userState === 0 ? 'success' : 'warning'">{{
         detailsData.userState === 0 ? "在职" : "离职"
       }}</el-tag>
     </el-descriptions-item>
