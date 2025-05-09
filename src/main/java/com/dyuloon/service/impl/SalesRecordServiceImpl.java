@@ -131,23 +131,6 @@ public class SalesRecordServiceImpl extends ServiceImpl<SalesRecordMapper, Sales
 
     // 删单个
     @Override
-    /*public ResultVO deleteScarceRecord(Integer id) {
-        SalesRecord salesRecord = this.baseMapper.selectById(id);
-        // 查货物
-        StockGoods stockGoods = this.stockGoodsMapper.selectById(salesRecord.getRecordGoods());
-        // 算剩余数量
-        Integer oldOne = stockGoods.getGoodsQuantity();
-        Integer newOne = Math.toIntExact(salesRecord.getRecordNum());
-        Integer num = oldOne + newOne;
-        LambdaUpdateWrapper<StockGoods> luw = new LambdaUpdateWrapper<>();
-        luw.eq(StockGoods::getGoodsId, salesRecord.getRecordGoods());
-        luw.set(StockGoods::getGoodsQuantity, num);
-        this.stockGoodsMapper.update(null, luw);
-        // 完成删除
-        int remove = this.baseMapper.deleteById(id);
-        ResultVO resultVO = remove != 0 ? ResultVOUtil.success(null, "删除成功！") : ResultVOUtil.fail("删除失败！");
-        return resultVO;
-    }*/
     public ResultVO deleteScarceRecord(Integer id) {
         SalesRecord salesRecord = this.baseMapper.selectById(id);
 
