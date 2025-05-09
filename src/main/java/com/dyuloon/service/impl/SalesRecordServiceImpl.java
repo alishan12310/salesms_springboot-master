@@ -131,7 +131,7 @@ public class SalesRecordServiceImpl extends ServiceImpl<SalesRecordMapper, Sales
 
     // 删单个
     @Override
-    public ResultVO deleteScarceRecord(Integer id) {
+    /*public ResultVO deleteScarceRecord(Integer id) {
         SalesRecord salesRecord = this.baseMapper.selectById(id);
         // 查货物
         StockGoods stockGoods = this.stockGoodsMapper.selectById(salesRecord.getRecordGoods());
@@ -147,6 +147,30 @@ public class SalesRecordServiceImpl extends ServiceImpl<SalesRecordMapper, Sales
         int remove = this.baseMapper.deleteById(id);
         ResultVO resultVO = remove != 0 ? ResultVOUtil.success(null, "删除成功！") : ResultVOUtil.fail("删除失败！");
         return resultVO;
+    }*/
+    public ResultVO deleteScarceRecord(Integer id) {
+        SalesRecord salesRecord = this.baseMapper.selectById(id);
+
+        if (salesRecord == null) {
+            return ResultVOUtil.fail("销售记录不存在");
+        }
+
+        StockGoods stockGoods = this.stockGoodsMapper.selectById(salesRecord.getRecordGoods());
+        if (stockGoods == null) {
+            return ResultVOUtil.fail("关联的库存商品不存在");
+        }
+
+        Integer oldOne = stockGoods.getGoodsQuantity();
+        Integer newOne = Math.toIntExact(salesRecord.getRecordNum());
+        Integer num = oldOne + newOne;
+
+        LambdaUpdateWrapper<StockGoods> luw = new LambdaUpdateWrapper<>();
+        luw.eq(StockGoods::getGoodsId, salesRecord.getRecordGoods());
+        luw.set(StockGoods::getGoodsQuantity, num);
+        this.stockGoodsMapper.update(null, luw);
+
+        int remove = this.baseMapper.deleteById(id);
+        return remove != 0 ? ResultVOUtil.success(null, "删除成功！") : ResultVOUtil.fail("删除失败！");
     }
 
     @Override
